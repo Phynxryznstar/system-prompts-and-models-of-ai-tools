@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+import subprocess
+import time
+import webbrowser
+from pathlib import Path
+
 import click
 import uvicorn
 
@@ -13,6 +18,9 @@ from reasoning.engine import find_all_strategies
 from reasoning.scenario_schema import load_client_scenario_from_file
 from reporting.builder import build_full_report
 from scoring.engine import score_scenario
+
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+FRONTEND_URL = "http://localhost:5173"
 
 
 @click.group(invoke_without_command=True)
@@ -118,3 +126,20 @@ def rank_strategies_command(scenario_id: str) -> None:
 def serve_api_command() -> None:
     """Run the FastAPI app with Uvicorn on http://localhost:8000."""
     uvicorn.run(fastapi_app, host="localhost", port=8000)
+
+
+@cli.command("serve-frontend")
+def serve_frontend_command() -> None:
+    """Install frontend dependencies if needed, then run the Vite dev server."""
+    if not (FRONTEND_DIR / "node_modules").exists():
+        click.echo("Installing frontend dependencies (npm install)...")
+        subprocess.run(["npm", "install"], cwd=FRONTEND_DIR, check=True)
+
+    click.echo(f"Starting the frontend dev server at {FRONTEND_URL} ...")
+    process = subprocess.Popen(["npm", "run", "dev"], cwd=FRONTEND_DIR)
+    try:
+        time.sleep(2)
+        webbrowser.open(FRONTEND_URL)
+        process.wait()
+    except KeyboardInterrupt:
+        process.terminate()
