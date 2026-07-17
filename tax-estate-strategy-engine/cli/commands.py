@@ -8,6 +8,7 @@ from graph.seed_example_data import seed_example_data
 from ingestion.scenario_ingestion import ingest_client_scenario
 from reasoning.engine import find_all_strategies
 from reasoning.scenario_schema import load_client_scenario_from_file
+from scoring.engine import score_scenario
 
 
 @click.group(invoke_without_command=True)
@@ -56,3 +57,21 @@ def run_reasoning_command(scenario_id: str) -> None:
     click.echo(f"Strategies for scenario '{scenario_id}':")
     for strategy in strategies:
         click.echo(f"  - {strategy.name} ({strategy.type.value})")
+
+
+@cli.command("score-strategies")
+@click.argument("scenario_id")
+def score_strategies_command(scenario_id: str) -> None:
+    """Run reasoning and scoring for a ClientScenario, then print the results."""
+    try:
+        scored = score_scenario(scenario_id)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    if not scored:
+        click.echo(f"No strategies found for scenario '{scenario_id}'.")
+        return
+
+    click.echo(f"Scored strategies for scenario '{scenario_id}':")
+    for strategy, score in sorted(scored, key=lambda pair: pair[1], reverse=True):
+        click.echo(f"  - {strategy.name} ({strategy.type.value}): ${score:,.0f}")
