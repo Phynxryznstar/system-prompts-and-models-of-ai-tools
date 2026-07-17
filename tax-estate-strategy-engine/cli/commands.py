@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import click
+import uvicorn
 
+from api.server import app as fastapi_app
 from graph.seed_example_data import seed_example_data
 from ingestion.scenario_ingestion import ingest_client_scenario
 from ranking.engine import rank_scenario
@@ -110,3 +112,9 @@ def rank_strategies_command(scenario_id: str) -> None:
             f"  - {strategy.name} ({strategy.type.value}): "
             f"raw=${raw_score:,.0f} weighted=${weighted_score:,.0f}"
         )
+
+
+@cli.command("serve-api")
+def serve_api_command() -> None:
+    """Run the FastAPI app with Uvicorn on http://localhost:8000."""
+    uvicorn.run(fastapi_app, host="localhost", port=8000)
