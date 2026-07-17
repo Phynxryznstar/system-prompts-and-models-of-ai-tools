@@ -6,6 +6,7 @@ import click
 
 from graph.seed_example_data import seed_example_data
 from ingestion.scenario_ingestion import ingest_client_scenario
+from reasoning.engine import find_all_strategies
 from reasoning.scenario_schema import load_client_scenario_from_file
 
 
@@ -37,3 +38,21 @@ def ingest_scenario_command(path: str) -> None:
         f"{summary['constraints']} constraints, "
         f"1 state tax rule ({scenario.state})"
     )
+
+
+@cli.command("run-reasoning")
+@click.argument("scenario_id")
+def run_reasoning_command(scenario_id: str) -> None:
+    """Run the reasoning engine against a ClientScenario already in Neo4j."""
+    try:
+        strategies = find_all_strategies(scenario_id)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    if not strategies:
+        click.echo(f"No strategies found for scenario '{scenario_id}'.")
+        return
+
+    click.echo(f"Strategies for scenario '{scenario_id}':")
+    for strategy in strategies:
+        click.echo(f"  - {strategy.name} ({strategy.type.value})")
