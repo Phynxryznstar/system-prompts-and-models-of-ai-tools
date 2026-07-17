@@ -33,6 +33,7 @@ class NodeLabel(str, Enum):
     BENEFICIARY = "Beneficiary"
     CLIENT_SCENARIO = "ClientScenario"
     STATE_TAX_RULE = "StateTaxRule"
+    ASSET = "Asset"
 
 
 class RelationshipType(str, Enum):
@@ -57,6 +58,9 @@ class RelationshipType(str, Enum):
     ENHANCES_STRATEGY = "ENHANCES_STRATEGY"
     USES_OWNERSHIP_STRUCTURE = "USES_OWNERSHIP_STRUCTURE"
     APPLIES_IN_STATE = "APPLIES_IN_STATE"
+    HAS_ENTITY = "HAS_ENTITY"
+    HAS_ACTIVITY = "HAS_ACTIVITY"
+    HAS_ASSET = "HAS_ASSET"
 
 
 # Every node carries a unique `id` property (enforced below). This maps
@@ -79,6 +83,7 @@ NODE_INDEXED_PROPERTIES: dict[NodeLabel, tuple[str, ...]] = {
     NodeLabel.BENEFICIARY: ("name",),
     NodeLabel.CLIENT_SCENARIO: ("client_id",),
     NodeLabel.STATE_TAX_RULE: ("state",),
+    NodeLabel.ASSET: ("type",),
 }
 
 

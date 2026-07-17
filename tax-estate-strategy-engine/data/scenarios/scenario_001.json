@@ -1,0 +1,42 @@
+{
+  "id": "scenario_001",
+  "tax_year": 2026,
+  "filing_status": "MFJ",
+  "income_range": "7000000-10000000",
+  "state": "FL",
+  "entities": [
+    { "id": "entity_client", "type": "individual", "owner": "client" },
+    { "id": "entity_spouse", "type": "individual", "owner": "spouse" },
+    { "id": "entity_scorp", "type": "s_corporation", "owner": "client" },
+    { "id": "entity_ccorp", "type": "c_corporation", "owner": "spouse" },
+    { "id": "partnership_1", "type": "partnership", "ownership_percent": 50, "active_participation": true },
+    { "id": "partnership_2", "type": "partnership", "ownership_percent": 50, "active_participation": true },
+    { "id": "partnership_3", "type": "partnership", "ownership_percent": 50, "active_participation": true },
+    { "id": "partnership_4", "type": "partnership", "ownership_percent": 50, "active_participation": true },
+    { "id": "partnership_5", "type": "partnership", "ownership_percent": 50, "active_participation": true }
+  ],
+  "activities": [
+    { "id": "activity_trade_business_1", "type": "trade_or_business", "entity": "partnership_1", "active": true },
+    { "id": "activity_trade_business_2", "type": "trade_or_business", "entity": "partnership_2", "active": true },
+    { "id": "activity_trade_business_3", "type": "trade_or_business", "entity": "partnership_3", "active": true },
+    { "id": "activity_trade_business_4", "type": "trade_or_business", "entity": "partnership_4", "active": true },
+    { "id": "activity_trade_business_5", "type": "trade_or_business", "entity": "partnership_5", "active": true },
+    { "id": "activity_scorp_business", "type": "trade_or_business", "entity": "entity_scorp", "active": true },
+    { "id": "activity_ccorp_business", "type": "trade_or_business", "entity": "entity_ccorp", "active": true },
+    { "id": "activity_farm", "type": "farming", "entity": "entity_client", "active": true },
+    { "id": "activity_rental_1", "type": "rental_real_estate", "entity": "entity_client", "active": true },
+    { "id": "activity_rental_2", "type": "rental_real_estate", "entity": "entity_client", "active": true }
+  ],
+  "assets": [
+    { "id": "asset_farm_property", "type": "commercial_farm", "value": 2500000, "acreage": 20, "buildings": 6, "activity": "activity_farm" },
+    { "id": "asset_commercial_building", "type": "commercial_real_estate", "value": 400000, "activity": "activity_rental_2" }
+  ],
+  "existing_elections": [],
+  "constraints": [
+    "high_income",
+    "NIIT_risk",
+    "estate_tax_risk",
+    "passive_loss_risk",
+    "interest_limitation_risk"
+  ]
+}
