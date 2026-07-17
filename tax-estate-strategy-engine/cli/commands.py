@@ -6,6 +6,7 @@ import click
 
 from graph.seed_example_data import seed_example_data
 from ingestion.scenario_ingestion import ingest_client_scenario
+from ranking.engine import rank_scenario
 from reasoning.engine import find_all_strategies
 from reasoning.scenario_schema import load_client_scenario_from_file
 from reporting.builder import build_full_report
@@ -88,3 +89,24 @@ def generate_report_command(scenario_id: str) -> None:
         raise click.ClickException(str(exc)) from exc
 
     click.echo(report)
+
+
+@cli.command("rank-strategies")
+@click.argument("scenario_id")
+def rank_strategies_command(scenario_id: str) -> None:
+    """Run reasoning, scoring, and ranking for a ClientScenario, then print the results."""
+    try:
+        ranked = rank_scenario(scenario_id)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    if not ranked:
+        click.echo(f"No strategies found for scenario '{scenario_id}'.")
+        return
+
+    click.echo(f"Ranked strategies for scenario '{scenario_id}':")
+    for strategy, raw_score, weighted_score in ranked:
+        click.echo(
+            f"  - {strategy.name} ({strategy.type.value}): "
+            f"raw=${raw_score:,.0f} weighted=${weighted_score:,.0f}"
+        )
