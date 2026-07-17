@@ -8,6 +8,7 @@ from graph.seed_example_data import seed_example_data
 from ingestion.scenario_ingestion import ingest_client_scenario
 from reasoning.engine import find_all_strategies
 from reasoning.scenario_schema import load_client_scenario_from_file
+from reporting.builder import build_full_report
 from scoring.engine import score_scenario
 
 
@@ -75,3 +76,15 @@ def score_strategies_command(scenario_id: str) -> None:
     click.echo(f"Scored strategies for scenario '{scenario_id}':")
     for strategy, score in sorted(scored, key=lambda pair: pair[1], reverse=True):
         click.echo(f"  - {strategy.name} ({strategy.type.value}): ${score:,.0f}")
+
+
+@cli.command("generate-report")
+@click.argument("scenario_id")
+def generate_report_command(scenario_id: str) -> None:
+    """Load a ClientScenario, run reasoning + scoring, and print a Markdown report."""
+    try:
+        report = build_full_report(scenario_id)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    click.echo(report)
