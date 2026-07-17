@@ -1,0 +1,27 @@
+# Applies to both deployment/Dockerfile.backend and Dockerfile.frontend,
+# which both build with this directory (tax-estate-strategy-engine/) as
+# their context.
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node / frontend build artifacts — the frontend image installs fresh
+# dependencies and builds from source, so these would only bloat the
+# build context and risk stale artifacts leaking in.
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Git
+.git/
+.gitignore
+
+# Deployment secrets — never bake these into an image.
+deployment/.env
+
+# Editor/OS cruft
+.DS_Store

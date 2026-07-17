@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 import time
 import webbrowser
@@ -21,6 +22,9 @@ from scoring.engine import score_scenario
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 FRONTEND_URL = "http://localhost:5173"
+DEPLOYMENT_DIR = Path(__file__).resolve().parent.parent / "deployment"
+BACKEND_URL = "http://localhost:8000"
+NEO4J_BROWSER_URL = "http://localhost:7474"
 
 
 @click.group(invoke_without_command=True)
@@ -143,3 +147,31 @@ def serve_frontend_command() -> None:
         process.wait()
     except KeyboardInterrupt:
         process.terminate()
+
+
+def _compose_command() -> list[str]:
+    """Return the available Compose invocation: standalone `docker-compose`
+    if installed, otherwise the `docker compose` plugin."""
+    if shutil.which("docker-compose"):
+        return ["docker-compose"]
+    return ["docker", "compose"]
+
+
+@cli.command("deploy-local")
+def deploy_local_command() -> None:
+    """Check for deployment/.env, then run the full stack with docker-compose."""
+    env_path = DEPLOYMENT_DIR / ".env"
+    if not env_path.exists():
+        raise click.ClickException(
+            f"Missing {env_path}. Run:\n"
+            f"  cd {DEPLOYMENT_DIR} && cp env.example .env\n"
+            "then edit .env (set a real NEO4J_PASSWORD) before retrying."
+        )
+
+    click.echo("Starting local deployment (Neo4j + backend + frontend)...")
+    click.echo(f"  Backend:       {BACKEND_URL}")
+    click.echo(f"  Frontend:      {FRONTEND_URL}")
+    click.echo(f"  Neo4j Browser: {NEO4J_BROWSER_URL}")
+    click.echo()
+
+    subprocess.run([*_compose_command(), "up", "--build"], cwd=DEPLOYMENT_DIR, check=True)

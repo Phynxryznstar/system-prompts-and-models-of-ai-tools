@@ -18,6 +18,7 @@ a FastAPI backend, or the browser.
 ├── reporting/    # Assembles a Markdown strategy report from scenario + strategy data
 ├── api/          # FastAPI app exposing all of the above over HTTP
 ├── frontend/     # React + TypeScript (Vite) app that talks to the API
+├── deployment/   # Dockerfiles + docker-compose for running/deploying the whole stack
 ├── cli/          # Command-line interface tying every layer together
 ├── config/       # Configuration (Neo4j connection, API keys)
 ├── data/         # Sample data (e.g. example client scenarios)
@@ -78,6 +79,8 @@ a FastAPI backend, or the browser.
    - To serve the API: `python main.py serve-api` (http://localhost:8000).
    - To serve the frontend: `python main.py serve-frontend` (http://localhost:5173,
      opens automatically; requires the API running separately).
+   - To run the whole stack (Neo4j + backend + frontend) in Docker:
+     `python main.py deploy-local` — see `deployment/README_DEPLOYMENT.md`.
 
 ## Running locally
 
@@ -116,7 +119,10 @@ npm run dev
   ingestion, reasoning, scoring, ranking, and reporting over HTTP.
 - `frontend/` — React + TypeScript + Vite + Tailwind app: ingest a
   scenario, view its ranked strategies, and read/download its report.
-- `cli/` — commands for every step above, including `serve-api` and
-  `serve-frontend`.
+- `cli/` — commands for every step above, including `serve-api`,
+  `serve-frontend`, and `deploy-local`.
 - `config/` — Neo4j settings from environment variables; not yet
   expanded with other API keys.
+- `deployment/` — Dockerfiles for the backend and frontend, a
+  docker-compose stack (Neo4j + backend + frontend), and a deployment
+  guide covering Render/Railway/Vercel/Docker Hub and Neo4j Aura.

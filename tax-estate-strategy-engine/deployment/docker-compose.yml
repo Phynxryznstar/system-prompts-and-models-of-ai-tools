@@ -1,0 +1,62 @@
+# Local/dev orchestration for the Tax + Estate Strategy Engine: a Neo4j
+# database, the FastAPI backend, and the React frontend, each in its own
+# container. Run `docker-compose up --build` from this directory (after
+# copying env.example to .env) — see README_DEPLOYMENT.md for details.
+#
+# NEO4J_USER / NEO4J_PASSWORD / API_URL come from env.example; they're
+# mapped below to the names the application code and the official Neo4j
+# image actually expect (NEO4J_USERNAME, NEO4J_AUTH, VITE_API_BASE_URL).
+
+services:
+  neo4j:
+    image: neo4j:5
+    container_name: tax-estate-strategy-neo4j
+    ports:
+      - "7474:7474" # Neo4j Browser (HTTP)
+      - "7687:7687" # Bolt protocol
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-changeme}
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.backend
+    container_name: tax-estate-strategy-backend
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    environment:
+      NEO4J_URI: ${NEO4J_URI:-bolt://neo4j:7687}
+      NEO4J_USERNAME: ${NEO4J_USER:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-changeme}
+      NEO4J_DATABASE: ${NEO4J_DATABASE:-neo4j}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile.frontend
+      args:
+        VITE_API_BASE_URL: ${API_URL:-http://localhost:8000}
+    container_name: tax-estate-strategy-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    restart: unless-stopped
+
+volumes:
+  neo4j_data:
+  neo4j_logs:

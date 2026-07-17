@@ -1,0 +1,30 @@
+# Production image for the Tax + Estate Strategy Engine React frontend.
+#
+# Build context is the project root (tax-estate-strategy-engine/); this
+# Dockerfile only touches files under frontend/. See docker-compose.yml
+# for how VITE_API_BASE_URL is passed in as a build arg.
+
+FROM node:20
+
+WORKDIR /app
+
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+
+COPY frontend/ .
+
+# Vite inlines VITE_* env vars into the bundle at build time, so this has
+# to be a build ARG (not a runtime `environment:` entry) — it must be set
+# before `npm run build` runs. This URL is called from the *browser*, not
+# from inside the Docker network, so it must be a host-reachable address
+# (e.g. http://localhost:8000), not the `backend` service name.
+ARG VITE_API_BASE_URL=http://localhost:8000
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
+RUN npm run build
+
+EXPOSE 5173
+
+# `vite preview` serves the production build from dist/; --host exposes
+# it outside the container, not just to localhost inside it.
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "5173"]

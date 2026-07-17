@@ -1,0 +1,37 @@
+# Production image for the Tax + Estate Strategy Engine FastAPI backend.
+#
+# Build context is the project root (tax-estate-strategy-engine/), so this
+# Dockerfile can COPY requirements.txt and the application source directly.
+# See docker-compose.yml for how the context/dockerfile paths are wired
+# together, and env.example for the environment variables it expects.
+
+FROM python:3.11-slim
+
+# curl: used for container healthchecks; build-essential: compiles any
+# C-extension Python dependencies that don't ship prebuilt wheels.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Sane defaults for local/dev use with docker-compose's `neo4j` service.
+# Override at runtime with real credentials (docker-compose `environment:`,
+# `docker run -e ...`, or your platform's env var settings) — never bake
+# real secrets into the image.
+ENV NEO4J_URI=bolt://neo4j:7687 \
+    NEO4J_USERNAME=neo4j \
+    NEO4J_PASSWORD=changeme \
+    NEO4J_DATABASE=neo4j
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl --fail http://localhost:8000/ || exit 1
+
+CMD ["uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "8000"]
